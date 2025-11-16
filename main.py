@@ -1,6 +1,11 @@
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from typing import Any, Dict
+
+from schemas import Player
+from database import create_document
 
 app = FastAPI()
 
@@ -63,6 +68,16 @@ def test_database():
     response["database_name"] = "✅ Set" if os.getenv("DATABASE_NAME") else "❌ Not Set"
     
     return response
+
+
+@app.post("/api/players")
+def create_player(player: Player) -> Dict[str, Any]:
+    """
+    Create a new player submission.
+    Accepts JSON body matching the Player schema. Files should be provided as base64 strings.
+    """
+    inserted_id = create_document("player", player)
+    return {"status": "ok", "id": inserted_id}
 
 
 if __name__ == "__main__":
